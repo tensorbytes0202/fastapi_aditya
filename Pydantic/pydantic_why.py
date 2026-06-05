@@ -1,5 +1,5 @@
 from multiprocessing import Value
-from pydantic import BaseModel, EmailStr, AnyUrl,Field,field_validator
+from pydantic import BaseModel, EmailStr, AnyUrl,Field,field_validator,model_validator
 from typing import List, Dict, Optional,Annotated
 
 
@@ -25,12 +25,30 @@ class Patient(BaseModel):
 
         if domain_name not in valid_domains:
             raise ValueError('Not a valid domain')
+        return value
 
+    @field_validator('name')
+    @classmethod
+    def transform_name(cls,value):
+        return value.upper()
+    
+    @field_validator('age',mode='before')
+    @classmethod
+    def validate_age(cls,value):
+        if 0< value<100:
+            return value
+        else:
+            raise ValueError('Age should be in between 0 and 100')
 def insert_patient_data(patient: Patient):
     print(patient.name)
     print(patient.age)
     print("inserted")
 
+@model_validator(mode='after')
+def validate_emergency_contact(cls,model):
+    if model.age > 60 and 'emergency' not in model.contact_details:
+        raise ValueError('Patients older than 60 must have an emergency contact')
+    return model
 
 def update_patient_data(patient: Patient):
     print(patient.name)

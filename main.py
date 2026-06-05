@@ -1,6 +1,5 @@
 import json
-from fastapi import FastAPI , Path , HTTPException , Query
-
+from fastapi import FastAPI , Path , HTTPException , Query, 
 app = FastAPI()
 
 def load_data():
